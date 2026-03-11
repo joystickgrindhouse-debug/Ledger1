@@ -12,4 +12,3 @@ request.onsuccess=e=>{
 db=e.target.result
 renderTransactions()
 }
-```
