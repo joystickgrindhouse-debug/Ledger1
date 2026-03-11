@@ -9,11 +9,13 @@
 
 <title>Pocket Ledger Pro</title>
 
+<!-- PWA -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#6a0dad">
 
+<!-- Icons -->
 <link rel="icon" href="icons/favicon.ico">
-<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -74,6 +76,8 @@ border:none;
 
 button.primary{
 background:#a855ff;
+color:white;
+font-weight:bold;
 }
 
 .transaction{
@@ -88,6 +92,11 @@ font-size:26px;
 text-align:center;
 margin-bottom:10px;
 font-weight:bold;
+}
+
+canvas{
+background:white;
+border-radius:8px;
 }
 
 </style>
@@ -189,38 +198,36 @@ font-weight:bold;
 
 <script>
 
-let ledger = JSON.parse(localStorage.getItem("ledger")||"[]")
+let ledger = JSON.parse(localStorage.getItem("ledger") || "[]")
 
 function save(){
-
 localStorage.setItem("ledger",JSON.stringify(ledger))
 renderTransactions()
-
 }
 
 function showTab(tab){
-
 document.querySelectorAll("section").forEach(s=>s.classList.remove("active"))
 document.getElementById(tab).classList.add("active")
-
 }
 
 function addTransaction(){
 
 let tx={
 id:Date.now(),
-desc:desc.value,
-amount:Number(amount.value),
-type:type.value,
-date:date.value
+desc:document.getElementById("desc").value,
+amount:Number(document.getElementById("amount").value),
+type:document.getElementById("type").value,
+date:document.getElementById("date").value
 }
+
+if(!tx.desc || !tx.amount) return
 
 ledger.push(tx)
 
 save()
 
-desc.value=""
-amount.value=""
+document.getElementById("desc").value=""
+document.getElementById("amount").value=""
 
 }
 
@@ -229,7 +236,7 @@ function renderTransactions(){
 let container=document.getElementById("transactions")
 container.innerHTML=""
 
-let searchVal=search.value?.toLowerCase()||""
+let searchVal=document.getElementById("search").value.toLowerCase()
 
 let balance=0
 
@@ -249,8 +256,7 @@ container.appendChild(div)
 
 })
 
-balanceEl=document.getElementById("balance")
-balanceEl.innerText="$"+balance
+document.getElementById("balance").innerText="$"+balance
 
 renderDebts()
 renderChart()
@@ -262,11 +268,9 @@ function renderDebts(){
 let el=document.getElementById("debtList")
 el.innerHTML=""
 
-ledger.filter(t=>t.type==="owed"||t.type==="owe")
+ledger.filter(t=>t.type==="owed" || t.type==="owe")
 .forEach(t=>{
-
 el.innerHTML+=`<div class="transaction">${t.desc} $${t.amount}</div>`
-
 })
 
 }
@@ -280,9 +284,7 @@ res.innerHTML=""
 
 ledger.filter(t=>t.date===date)
 .forEach(t=>{
-
 res.innerHTML+=`<div>${t.desc} $${t.amount}</div>`
-
 })
 
 }
@@ -295,10 +297,8 @@ let income=0
 let expense=0
 
 ledger.forEach(t=>{
-
 if(t.type==="income") income+=t.amount
 if(t.type==="expense") expense+=t.amount
-
 })
 
 if(chart) chart.destroy()
@@ -350,11 +350,8 @@ let file=e.target.files[0]
 let reader=new FileReader()
 
 reader.onload=()=>{
-
 ledger=JSON.parse(reader.result)
-
 save()
-
 }
 
 reader.readAsText(file)
@@ -362,6 +359,12 @@ reader.readAsText(file)
 }
 
 renderTransactions()
+
+/* SERVICE WORKER */
+
+if("serviceWorker" in navigator){
+navigator.serviceWorker.register("service-worker.js")
+}
 
 </script>
 
