@@ -9,14 +9,13 @@
 
 <title>Pocket Ledger Pro</title>
 
-<!-- PWA -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#6a0dad">
 
-<!-- Icons -->
-<link rel="icon" type="image/x-icon" href="icons/favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-192.png">
-<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+<link rel="icon" href="icons/favicon.ico">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 
@@ -47,11 +46,6 @@ border:none;
 border-radius:6px;
 background:#2d2d2d;
 color:white;
-font-size:14px;
-}
-
-nav button:hover{
-background:#3a3a3a;
 }
 
 section{
@@ -76,17 +70,10 @@ padding:10px;
 margin-top:5px;
 border-radius:6px;
 border:none;
-font-size:14px;
 }
 
 button.primary{
 background:#a855ff;
-color:white;
-font-weight:bold;
-}
-
-button.primary:hover{
-background:#9333ea;
 }
 
 .transaction{
@@ -101,11 +88,6 @@ font-size:26px;
 text-align:center;
 margin-bottom:10px;
 font-weight:bold;
-}
-
-canvas{
-background:white;
-border-radius:8px;
 }
 
 </style>
@@ -149,7 +131,7 @@ border-radius:8px;
 
 <div class="card">
 
-<input id="search" placeholder="Search transactions..." oninput="renderTransactions()">
+<input id="search" placeholder="Search..." oninput="renderTransactions()">
 
 <div id="transactions"></div>
 
@@ -157,12 +139,9 @@ border-radius:8px;
 
 </section>
 
-
 <section id="calendar">
 
 <div class="card">
-
-<h3>Calendar Lookup</h3>
 
 <input type="date" id="calendarDate" onchange="calendarView()">
 
@@ -171,7 +150,6 @@ border-radius:8px;
 </div>
 
 </section>
-
 
 <section id="debts">
 
@@ -185,12 +163,9 @@ border-radius:8px;
 
 </section>
 
-
 <section id="charts">
 
 <div class="card">
-
-<h3>Income vs Expense</h3>
 
 <canvas id="chart"></canvas>
 
@@ -198,16 +173,13 @@ border-radius:8px;
 
 </section>
 
-
 <section id="settings">
 
 <div class="card">
 
-<h3>Backup & Export</h3>
+<button onclick="exportBackup()">Export Backup</button>
 
-<button onclick="exportData()">Export Backup (JSON)</button>
-
-<input type="file" onchange="importData(event)">
+<input type="file" onchange="importBackup(event)">
 
 <button onclick="exportCSV()">Export CSV</button>
 
@@ -215,10 +187,184 @@ border-radius:8px;
 
 </section>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="db.js"></script>
-<script src="app.js"></script>
+<script>
+
+let ledger = JSON.parse(localStorage.getItem("ledger")||"[]")
+
+function save(){
+
+localStorage.setItem("ledger",JSON.stringify(ledger))
+renderTransactions()
+
+}
+
+function showTab(tab){
+
+document.querySelectorAll("section").forEach(s=>s.classList.remove("active"))
+document.getElementById(tab).classList.add("active")
+
+}
+
+function addTransaction(){
+
+let tx={
+id:Date.now(),
+desc:desc.value,
+amount:Number(amount.value),
+type:type.value,
+date:date.value
+}
+
+ledger.push(tx)
+
+save()
+
+desc.value=""
+amount.value=""
+
+}
+
+function renderTransactions(){
+
+let container=document.getElementById("transactions")
+container.innerHTML=""
+
+let searchVal=search.value?.toLowerCase()||""
+
+let balance=0
+
+ledger.forEach(t=>{
+
+if(searchVal && !t.desc.toLowerCase().includes(searchVal)) return
+
+if(t.type==="income") balance+=t.amount
+if(t.type==="expense") balance-=t.amount
+
+let div=document.createElement("div")
+div.className="transaction"
+
+div.innerHTML=`<span>${t.desc}</span><span>$${t.amount}</span>`
+
+container.appendChild(div)
+
+})
+
+balanceEl=document.getElementById("balance")
+balanceEl.innerText="$"+balance
+
+renderDebts()
+renderChart()
+
+}
+
+function renderDebts(){
+
+let el=document.getElementById("debtList")
+el.innerHTML=""
+
+ledger.filter(t=>t.type==="owed"||t.type==="owe")
+.forEach(t=>{
+
+el.innerHTML+=`<div class="transaction">${t.desc} $${t.amount}</div>`
+
+})
+
+}
+
+function calendarView(){
+
+let date=document.getElementById("calendarDate").value
+let res=document.getElementById("calendarResults")
+
+res.innerHTML=""
+
+ledger.filter(t=>t.date===date)
+.forEach(t=>{
+
+res.innerHTML+=`<div>${t.desc} $${t.amount}</div>`
+
+})
+
+}
+
+let chart
+
+function renderChart(){
+
+let income=0
+let expense=0
+
+ledger.forEach(t=>{
+
+if(t.type==="income") income+=t.amount
+if(t.type==="expense") expense+=t.amount
+
+})
+
+if(chart) chart.destroy()
+
+chart=new Chart(document.getElementById("chart"),{
+type:"pie",
+data:{
+labels:["Income","Expense"],
+datasets:[{
+data:[income,expense]
+}]
+}
+})
+
+}
+
+function exportCSV(){
+
+let csv="desc,amount,type,date\n"
+
+ledger.forEach(t=>{
+csv+=`${t.desc},${t.amount},${t.type},${t.date}\n`
+})
+
+let blob=new Blob([csv])
+
+let a=document.createElement("a")
+a.href=URL.createObjectURL(blob)
+a.download="ledger.csv"
+a.click()
+
+}
+
+function exportBackup(){
+
+let blob=new Blob([JSON.stringify(ledger)])
+
+let a=document.createElement("a")
+a.href=URL.createObjectURL(blob)
+a.download="ledger-backup.json"
+a.click()
+
+}
+
+function importBackup(e){
+
+let file=e.target.files[0]
+
+let reader=new FileReader()
+
+reader.onload=()=>{
+
+ledger=JSON.parse(reader.result)
+
+save()
+
+}
+
+reader.readAsText(file)
+
+}
+
+renderTransactions()
+
+</script>
 
 </body>
-
 </html>
+```
