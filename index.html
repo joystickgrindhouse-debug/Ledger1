@@ -1,14 +1,22 @@
 ```html
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <title>Pocket Ledger Pro</title>
 
+<!-- PWA -->
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="theme-color" content="#6a0dad">
+
+<!-- Icons -->
+<link rel="icon" type="image/x-icon" href="icons/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
 
 <style>
 
@@ -39,6 +47,11 @@ border:none;
 border-radius:6px;
 background:#2d2d2d;
 color:white;
+font-size:14px;
+}
+
+nav button:hover{
+background:#3a3a3a;
 }
 
 section{
@@ -63,10 +76,17 @@ padding:10px;
 margin-top:5px;
 border-radius:6px;
 border:none;
+font-size:14px;
 }
 
 button.primary{
 background:#a855ff;
+color:white;
+font-weight:bold;
+}
+
+button.primary:hover{
+background:#9333ea;
 }
 
 .transaction{
@@ -80,6 +100,12 @@ border-bottom:1px solid rgba(255,255,255,0.2);
 font-size:26px;
 text-align:center;
 margin-bottom:10px;
+font-weight:bold;
+}
+
+canvas{
+background:white;
+border-radius:8px;
 }
 
 </style>
@@ -117,20 +143,26 @@ margin-bottom:10px;
 
 <input type="date" id="date">
 
-<button class="primary" onclick="addTransaction()">Add</button>
+<button class="primary" onclick="addTransaction()">Add Transaction</button>
 
 </div>
 
 <div class="card">
-<input id="search" placeholder="Search..." oninput="renderTransactions()">
+
+<input id="search" placeholder="Search transactions..." oninput="renderTransactions()">
+
 <div id="transactions"></div>
+
 </div>
 
 </section>
 
+
 <section id="calendar">
 
 <div class="card">
+
+<h3>Calendar Lookup</h3>
 
 <input type="date" id="calendarDate" onchange="calendarView()">
 
@@ -140,28 +172,41 @@ margin-bottom:10px;
 
 </section>
 
+
 <section id="debts">
 
 <div class="card">
+
 <h3>Debt List</h3>
+
 <div id="debtList"></div>
+
 </div>
 
 </section>
+
 
 <section id="charts">
 
 <div class="card">
+
+<h3>Income vs Expense</h3>
+
 <canvas id="chart"></canvas>
+
 </div>
 
 </section>
+
 
 <section id="settings">
 
 <div class="card">
 
-<button onclick="exportData()">Export Backup</button>
+<h3>Backup & Export</h3>
+
+<button onclick="exportData()">Export Backup (JSON)</button>
+
 <input type="file" onchange="importData(event)">
 
 <button onclick="exportCSV()">Export CSV</button>
@@ -175,4 +220,5 @@ margin-bottom:10px;
 <script src="app.js"></script>
 
 </body>
+
 </html>
