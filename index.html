@@ -1,0 +1,179 @@
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Pocket Ledger Pro</title>
+
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+
+<style>
+
+body{
+margin:0;
+font-family:system-ui;
+background:linear-gradient(135deg,#6a0dad,#6f6f6f);
+color:white;
+}
+
+header{
+padding:15px;
+text-align:center;
+font-size:22px;
+font-weight:bold;
+}
+
+nav{
+display:flex;
+gap:8px;
+padding:10px;
+}
+
+nav button{
+flex:1;
+padding:10px;
+border:none;
+border-radius:6px;
+background:#2d2d2d;
+color:white;
+}
+
+section{
+padding:15px;
+display:none;
+}
+
+section.active{
+display:block;
+}
+
+.card{
+background:rgba(0,0,0,0.35);
+padding:15px;
+border-radius:10px;
+margin-bottom:15px;
+}
+
+input,select,button{
+width:100%;
+padding:10px;
+margin-top:5px;
+border-radius:6px;
+border:none;
+}
+
+button.primary{
+background:#a855ff;
+}
+
+.transaction{
+display:flex;
+justify-content:space-between;
+padding:6px;
+border-bottom:1px solid rgba(255,255,255,0.2);
+}
+
+.balance{
+font-size:26px;
+text-align:center;
+margin-bottom:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>Pocket Ledger Pro</header>
+
+<div class="balance" id="balance">$0</div>
+
+<nav>
+<button onclick="showTab('ledger')">Ledger</button>
+<button onclick="showTab('calendar')">Calendar</button>
+<button onclick="showTab('debts')">Debts</button>
+<button onclick="showTab('charts')">Charts</button>
+<button onclick="showTab('settings')">Settings</button>
+</nav>
+
+<section id="ledger" class="active">
+
+<div class="card">
+
+<input id="desc" placeholder="Description">
+
+<input id="amount" type="number" placeholder="Amount">
+
+<select id="type">
+<option value="income">Money In</option>
+<option value="expense">Money Out</option>
+<option value="owed">Owed To Me</option>
+<option value="owe">I Owe</option>
+</select>
+
+<input type="date" id="date">
+
+<button class="primary" onclick="addTransaction()">Add</button>
+
+</div>
+
+<div class="card">
+<input id="search" placeholder="Search..." oninput="renderTransactions()">
+<div id="transactions"></div>
+</div>
+
+</section>
+
+<section id="calendar">
+
+<div class="card">
+
+<input type="date" id="calendarDate" onchange="calendarView()">
+
+<div id="calendarResults"></div>
+
+</div>
+
+</section>
+
+<section id="debts">
+
+<div class="card">
+<h3>Debt List</h3>
+<div id="debtList"></div>
+</div>
+
+</section>
+
+<section id="charts">
+
+<div class="card">
+<canvas id="chart"></canvas>
+</div>
+
+</section>
+
+<section id="settings">
+
+<div class="card">
+
+<button onclick="exportData()">Export Backup</button>
+<input type="file" onchange="importData(event)">
+
+<button onclick="exportCSV()">Export CSV</button>
+
+</div>
+
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="db.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
+```
